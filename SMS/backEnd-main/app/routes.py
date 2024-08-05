@@ -1,13 +1,23 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory, current_app
 from . import db
 from .models import Student, Payment
 from datetime import datetime
 import logging
+import os
 
 routes = Blueprint('routes', __name__)
 
 # Set up basic logging for debugging
 logging.basicConfig(level=logging.DEBUG)
+
+# Serve React Frontend
+@routes.route('/', defaults={'path': ''})
+@routes.route('/<path:path>')
+def serve_react(path):
+    if path != "" and os.path.exists(os.path.join(current_app.static_folder, path)):
+        return send_from_directory(current_app.static_folder, path)
+    else:
+        return send_from_directory(current_app.static_folder, 'index.html')
 
 @routes.route('/students', methods=['GET'])
 def get_students():
