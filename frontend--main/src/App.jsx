@@ -16,10 +16,11 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Switch>
+          {/* Public Routes */}
           <Route exact path="/" component={Home} />
           <Route path="/login" component={LoginForm} />
 
-          {/* Private routes for dashboards */}
+          {/* Private routes for various dashboards */}
           <PrivateRoute path="/admin">
             <RoleBasedRoute role="admin">
               <AdminDashboard />
@@ -50,7 +51,7 @@ const App = () => {
             </RoleBasedRoute>
           </PrivateRoute>
 
-          {/* Redirect any other route to home */}
+          {/* Fallback to Home if route does not match */}
           <Redirect to="/" />
         </Switch>
       </Router>
