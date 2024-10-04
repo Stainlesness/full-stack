@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
 from app.models import db, Staff, Student, Fee, Payment, BusPayment, BusDestinationCharges, BoardingFee, Assignment, Event, Gallery, Notification
 
 routes = Blueprint('routes', __name__)
@@ -8,7 +8,7 @@ routes = Blueprint('routes', __name__)
 # db.init_app(app)
 
 # CRUD for Staff
-@app.route('/staff', methods=['POST'])
+@routes.route('/staff', methods=['POST'])
 def create_staff():
     data = request.json
     new_staff = Staff(
@@ -16,18 +16,18 @@ def create_staff():
         phone=data['phone'],
         role=data['role'],
         representing=data.get('representing')
-    
+    )
     new_staff.set_password(data['password'])  # Hash the password
     db.session.add(new_staff)
     db.session.commit()
     return jsonify({'message': 'Staff member created'}), 201
 
-@app.route('/staff/<int:id>', methods=['GET'])
+@routes.route('/staff/<int:id>', methods=['GET'])
 def get_staff(id):
     staff = Staff.query.get_or_404(id)
     return jsonify({'id': staff.id, 'name': staff.name, 'phone': staff.phone, 'role': staff.role, 'representing': staff.representing})
 
-@app.route('/staff/<int:id>', methods=['PUT'])
+@routes.route('/staff/<int:id>', methods=['PUT'])
 def update_staff(id):
     staff = Staff.query.get_or_404(id)
     data = request.json
@@ -40,7 +40,7 @@ def update_staff(id):
     db.session.commit()
     return jsonify({'message': 'Staff member updated'})
 
-@app.route('/staff/<int:id>', methods=['DELETE'])
+@routes.route('/staff/<int:id>', methods=['DELETE'])
 def delete_staff(id):
     staff = Staff.query.get_or_404(id)
     db.session.delete(staff)
@@ -48,7 +48,7 @@ def delete_staff(id):
     return jsonify({'message': 'Staff member deleted'})
 
 # CRUD for Students
-@app.route('/students', methods=['POST'])
+@routes.route('/students', methods=['POST'])
 def create_student():
     data = request.json
     new_student = Student(
@@ -66,12 +66,12 @@ def create_student():
     db.session.commit()
     return jsonify({'message': 'Student created'}), 201
 
-@app.route('/students/<int:id>', methods=['GET'])
+@routes.route('/students/<int:id>', methods=['GET'])
 def get_student(id):
     student = Student.query.get_or_404(id)
     return jsonify({'id': student.id, 'name': student.name, 'admission_number': student.admission_number, 'grade': student.grade, 'balance': student.balance})
 
-@app.route('/students/<int:id>', methods=['PUT'])
+@routes.route('/students/<int:id>', methods=['PUT'])
 def update_student(id):
     student = Student.query.get_or_404(id)
     data = request.json
@@ -87,7 +87,7 @@ def update_student(id):
     db.session.commit()
     return jsonify({'message': 'Student updated'})
 
-@app.route('/students/<int:id>', methods=['DELETE'])
+@routes.route('/students/<int:id>', methods=['DELETE'])
 def delete_student(id):
     student = Student.query.get_or_404(id)
     db.session.delete(student)
@@ -95,7 +95,7 @@ def delete_student(id):
     return jsonify({'message': 'Student deleted'})
 
 # CRUD for Fees
-@app.route('/fees', methods=['POST'])
+@routes.route('/fees', methods=['POST'])
 def create_fee():
     data = request.json
     new_fee = Fee(
@@ -106,12 +106,12 @@ def create_fee():
     db.session.commit()
     return jsonify({'message': 'Fee created'}), 201
 
-@app.route('/fees/<int:id>', methods=['GET'])
+@routes.route('/fees/<int:id>', methods=['GET'])
 def get_fee(id):
     fee = Fee.query.get_or_404(id)
     return jsonify({'id': fee.id, 'grade': fee.grade, 'term_fee': fee.term_fee})
 
-@app.route('/fees/<int:id>', methods=['PUT'])
+@routes.route('/fees/<int:id>', methods=['PUT'])
 def update_fee(id):
     fee = Fee.query.get_or_404(id)
     data = request.json
@@ -120,7 +120,7 @@ def update_fee(id):
     db.session.commit()
     return jsonify({'message': 'Fee updated'})
 
-@app.route('/fees/<int:id>', methods=['DELETE'])
+@routes.route('/fees/<int:id>', methods=['DELETE'])
 def delete_fee(id):
     fee = Fee.query.get_or_404(id)
     db.session.delete(fee)
@@ -128,7 +128,7 @@ def delete_fee(id):
     return jsonify({'message': 'Fee deleted'})
 
 # CRUD for Bus Destinations
-@app.route('/bus_destinations', methods=['POST'])
+@routes.route('/bus_destinations', methods=['POST'])
 def create_bus_destination():
     data = request.json
     new_destination = BusDestinationCharges(
@@ -139,12 +139,12 @@ def create_bus_destination():
     db.session.commit()
     return jsonify({'message': 'Bus destination created'}), 201
 
-@app.route('/bus_destinations/<int:id>', methods=['GET'])
+@routes.route('/bus_destinations/<int:id>', methods=['GET'])
 def get_bus_destination(id):
     destination = BusDestinationCharges.query.get_or_404(id)
     return jsonify({'id': destination.id, 'destination': destination.destination, 'charge': destination.charge})
 
-@app.route('/bus_destinations/<int:id>', methods=['PUT'])
+@routes.route('/bus_destinations/<int:id>', methods=['PUT'])
 def update_bus_destination(id):
     destination = BusDestinationCharges.query.get_or_404(id)
     data = request.json
@@ -153,7 +153,7 @@ def update_bus_destination(id):
     db.session.commit()
     return jsonify({'message': 'Bus destination updated'})
 
-@app.route('/bus_destinations/<int:id>', methods=['DELETE'])
+@routes.route('/bus_destinations/<int:id>', methods=['DELETE'])
 def delete_bus_destination(id):
     destination = BusDestinationCharges.query.get_or_404(id)
     db.session.delete(destination)
@@ -161,14 +161,14 @@ def delete_bus_destination(id):
     return jsonify({'message': 'Bus destination deleted'})
 
 # CRUD for Payments
-@app.route('/payments', methods=['POST'])
+@routes.route('/payments', methods=['POST'])
 def create_payment():
     data = request.json
     payment = Payment.record_payment(data['admission_number'], data['amount'], data['method'])
     return jsonify({'message': 'Payment recorded', 'payment_id': payment.id}), 201
 
 # CRUD for Assignments
-@app.route('/assignments', methods=['POST'])
+@routes.route('/assignments', methods=['POST'])
 def create_assignment():
     data = request.json
     new_assignment = Assignment(
@@ -181,12 +181,12 @@ def create_assignment():
     db.session.commit()
     return jsonify({'message': 'Assignment created'}), 201
 
-@app.route('/assignments/<int:id>', methods=['GET'])
+@routes.route('/assignments/<int:id>', methods=['GET'])
 def get_assignment(id):
     assignment = Assignment.query.get_or_404(id)
     return jsonify({'id': assignment.id, 'title': assignment.title, 'grade': assignment.grade, 'description': assignment.description, 'due_date': assignment.due_date})
 
-@app.route('/assignments/<int:id>', methods=['PUT'])
+@routes.route('/assignments/<int:id>', methods=['PUT'])
 def update_assignment(id):
     assignment = Assignment.query.get_or_404(id)
     data = request.json
@@ -197,7 +197,7 @@ def update_assignment(id):
     db.session.commit()
     return jsonify({'message': 'Assignment updated'})
 
-@app.route('/assignments/<int:id>', methods=['DELETE'])
+@routes.route('/assignments/<int:id>', methods=['DELETE'])
 def delete_assignment(id):
     assignment = Assignment.query.get_or_404(id)
     db.session.delete(assignment)
@@ -205,7 +205,7 @@ def delete_assignment(id):
     return jsonify({'message': 'Assignment deleted'})
 
 # CRUD for Events
-@app.route('/events', methods=['POST'])
+@routes.route('/events', methods=['POST'])
 def create_event():
     data = request.json
     new_event = Event(
@@ -218,12 +218,12 @@ def create_event():
     db.session.commit()
     return jsonify({'message': 'Event created'}), 201
 
-@app.route('/events/<int:id>', methods=['GET'])
+@routes.route('/events/<int:id>', methods=['GET'])
 def get_event(id):
     event = Event.query.get_or_404(id)
     return jsonify({'id': event.id, 'title': event.title, 'date': event.date, 'destination': event.destination, 'description': event.description})
 
-@app.route('/events/<int:id>', methods=['PUT'])
+@routes.route('/events/<int:id>', methods=['PUT'])
 def update_event(id):
     event = Event.query.get_or_404(id)
     data = request.json
@@ -234,7 +234,7 @@ def update_event(id):
     db.session.commit()
     return jsonify({'message': 'Event updated'})
 
-@app.route('/events/<int:id>', methods=['DELETE'])
+@routes.route('/events/<int:id>', methods=['DELETE'])
 def delete_event(id):
     event = Event.query.get_or_404(id)
     db.session.delete(event)
@@ -242,7 +242,7 @@ def delete_event(id):
     return jsonify({'message': 'Event deleted'})
 
 # CRUD for Gallery
-@app.route('/gallery', methods=['POST'])
+@routes.route('/gallery', methods=['POST'])
 def create_gallery():
     data = request.json
     new_image = Gallery(
@@ -253,12 +253,12 @@ def create_gallery():
     db.session.commit()
     return jsonify({'message': 'Gallery image created'}), 201
 
-@app.route('/gallery/<int:id>', methods=['GET'])
+@routes.route('/gallery/<int:id>', methods=['GET'])
 def get_gallery_image(id):
     image = Gallery.query.get_or_404(id)
     return jsonify({'id': image.id, 'image_url': image.image_url, 'description': image.description})
 
-@app.route('/gallery/<int:id>', methods=['PUT'])
+@routes.route('/gallery/<int:id>', methods=['PUT'])
 def update_gallery_image(id):
     image = Gallery.query.get_or_404(id)
     data = request.json
@@ -267,7 +267,7 @@ def update_gallery_image(id):
     db.session.commit()
     return jsonify({'message': 'Gallery image updated'})
 
-@app.route('/gallery/<int:id>', methods=['DELETE'])
+@routes.route('/gallery/<int:id>', methods=['DELETE'])
 def delete_gallery_image(id):
     image = Gallery.query.get_or_404(id)
     db.session.delete(image)
@@ -275,7 +275,7 @@ def delete_gallery_image(id):
     return jsonify({'message': 'Gallery image deleted'})
 
 # CRUD for Notifications
-@app.route('/notifications', methods=['POST'])
+@routes.route('/notifications', methods=['POST'])
 def create_notification():
     data = request.json
     new_notification = Notification(
@@ -285,12 +285,12 @@ def create_notification():
     db.session.commit()
     return jsonify({'message': 'Notification created'}), 201
 
-@app.route('/notifications/<int:id>', methods=['GET'])
+@routes.route('/notifications/<int:id>', methods=['GET'])
 def get_notification(id):
     notification = Notification.query.get_or_404(id)
     return jsonify({'id': notification.id, 'message': notification.message, 'date': notification.date})
 
-@app.route('/notifications/<int:id>', methods=['PUT'])
+@routes.route('/notifications/<int:id>', methods=['PUT'])
 def update_notification(id):
     notification = Notification.query.get_or_404(id)
     data = request.json
@@ -298,7 +298,7 @@ def update_notification(id):
     db.session.commit()
     return jsonify({'message': 'Notification updated'})
 
-@app.route('/notifications/<int:id>', methods=['DELETE'])
+@routes.route('/notifications/<int:id>', methods=['DELETE'])
 def delete_notification(id):
     notification = Notification.query.get_or_404(id)
     db.session.delete(notification)
@@ -307,5 +307,4 @@ def delete_notification(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
+    
