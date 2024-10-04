@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
 const RoleBasedRoute = ({ role, children, ...rest }) => {
@@ -12,7 +12,7 @@ const RoleBasedRoute = ({ role, children, ...rest }) => {
         userRole === role ? (
           children
         ) : (
-          <Redirect
+          <Navigate
             to={{
               pathname: "/",
               state: { from: location }

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
 
 const PrivateRoute = ({ children, ...rest }) => {
   const { isLoggedIn } = useAuth();
-
+  
   return (
     <Route
       {...rest}
@@ -12,7 +12,7 @@ const PrivateRoute = ({ children, ...rest }) => {
         isLoggedIn ? (
           children
         ) : (
-          <Redirect
+          <Navigate
             to={{
               pathname: "/login",
               state: { from: location }

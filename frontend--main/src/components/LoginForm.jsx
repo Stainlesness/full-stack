@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -15,7 +15,7 @@ const LoginForm = () => {
     const role = username === 'admin' ? 'admin' : 'student'; // Example logic
     login(role);
 
-    history.push('/');
+    navigate('/');
   };
 
   return (
@@ -29,7 +29,7 @@ const LoginForm = () => {
       />
       <input
         type="password"
-        placeholder="Password"
+        placeholder="Password"t5t
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required

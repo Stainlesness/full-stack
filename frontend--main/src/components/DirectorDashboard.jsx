@@ -8,7 +8,7 @@ const DirectorDashboard = () => {
   const [paymentsPerTerm, setPaymentsPerTerm] = useState(0);
   const [paymentsPerYear, setPaymentsPerYear] = useState(0);
   const [totalExpected, setTotalExpected] = useState(0);
-  const [termPayments, setter payment 55th s] = useState([]);
+  const [termPayments, setTermPayments] = useState([]);
   const [notificationMessage, setNotificationMessage] = useState('');
 
   // Fetch admins, payments, and term-related data on mount

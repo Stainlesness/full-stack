@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
-from models import db, Staff, Student, Fee, Payment, BusPayment, BusDestinationCharges, BoardingFee, Assignment, Event, Gallery, Notification
+from app.models import db, Staff, Student, Fee, Payment, BusPayment, BusDestinationCharges, BoardingFee, Assignment, Event, Gallery, Notification
 
-app = Flask(__name__)
+routes = Blueprint('routes', __name__)
 
 # Initialize the database here
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'your_database_uri'
@@ -16,7 +16,7 @@ def create_staff():
         phone=data['phone'],
         role=data['role'],
         representing=data.get('representing')
-    )
+    
     new_staff.set_password(data['password'])  # Hash the password
     db.session.add(new_staff)
     db.session.commit()
@@ -164,7 +164,7 @@ def delete_bus_destination(id):
 @app.route('/payments', methods=['POST'])
 def create_payment():
     data = request.json
-    payment = Payment.record_payment(data['admission_number'], data['amount'])
+    payment = Payment.record_payment(data['admission_number'], data['amount'], data['method'])
     return jsonify({'message': 'Payment recorded', 'payment_id': payment.id}), 201
 
 # CRUD for Assignments
@@ -307,4 +307,5 @@ def delete_notification(id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
+
+

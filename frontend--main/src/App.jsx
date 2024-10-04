@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Updated for v6
 import Home from './components/Home';
 import LoginForm from './components/LoginForm';
 import AdminDashboard from './components/AdminDashboard';
@@ -15,45 +15,70 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <Switch>
+        <Routes>
           {/* Public Routes */}
-          <Route exact path="/" component={Home} />
-          <Route path="/login" component={LoginForm} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginForm />} />
 
           {/* Private routes for various dashboards */}
-          <PrivateRoute path="/admin">
-            <RoleBasedRoute role="admin">
-              <AdminDashboard />
-            </RoleBasedRoute>
-          </PrivateRoute>
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <RoleBasedRoute role="admin">
+                  <AdminDashboard />
+                </RoleBasedRoute>
+              </PrivateRoute>
+            }
+          />
 
-          <PrivateRoute path="/bursar">
-            <RoleBasedRoute role="bursar">
-              <BursarDashboard />
-            </RoleBasedRoute>
-          </PrivateRoute>
+          <Route
+            path="/bursar"
+            element={
+              <PrivateRoute>
+                <RoleBasedRoute role="bursar">
+                  <BursarDashboard />
+                </RoleBasedRoute>
+              </PrivateRoute>
+            }
+          />
 
-          <PrivateRoute path="/director">
-            <RoleBasedRoute role="director">
-              <DirectorDashboard />
-            </RoleBasedRoute>
-          </PrivateRoute>
+          <Route
+            path="/director"
+            element={
+              <PrivateRoute>
+                <RoleBasedRoute role="director">
+                  <DirectorDashboard />
+                </RoleBasedRoute>
+              </PrivateRoute>
+            }
+          />
 
-          <PrivateRoute path="/teacher">
-            <RoleBasedRoute role="teacher">
-              <TeacherDashboard />
-            </RoleBasedRoute>
-          </PrivateRoute>
+          <Route
+            path="/teacher"
+            element={
+              <PrivateRoute>
+                <RoleBasedRoute role="teacher">
+                  <TeacherDashboard />
+                </RoleBasedRoute>
+              </PrivateRoute>
+            }
+          />
 
-          <PrivateRoute path="/student">
-            <RoleBasedRoute role="student">
-              <StudentDashboard />
-            </RoleBasedRoute>
-          </PrivateRoute>
+          <Route
+            path="/student"
+            element={
+              <PrivateRoute>
+                <RoleBasedRoute role="student">
+                  <StudentDashboard />
+                </RoleBasedRoute>
+              </PrivateRoute>
+            }
+          />
 
           {/* Fallback to Home if route does not match */}
-          <Redirect to="/" />
-        </Switch>
+          <Route path="*" element={<Navigate to="/" />} /> {/* Updated for v6 */}
+        </Routes>
       </Router>
     </AuthProvider>
   );

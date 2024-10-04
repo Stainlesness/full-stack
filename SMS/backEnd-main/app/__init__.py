@@ -4,20 +4,26 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from .config import Config
 
+# Initialize extensions
 db = SQLAlchemy()
 migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
+    
+    # Enable CORS for all routes
     CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "DELETE", "PUT", "OPTIONS"])
 
+    # Load configurations
     app.config.from_object(Config)
 
+    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from app.routes import routes
-    app.register_blueprint(routes)
+    # Import and register routes
+    from app.routes import routes  # Use a relative import to get the routes
+    app.register_blueprint(routes)  # Register the blueprint
 
     return app
-
+    

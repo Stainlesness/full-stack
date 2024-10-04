@@ -60,15 +60,16 @@ class Payment(db.Model):
     admission_number = db.Column(db.String(50), db.ForeignKey('student.admission_number'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    method = db.Column(db.String(15))
 
     @staticmethod
-    def record_payment(admission_number, amount):
+    def record_payment(admission_number, amount,method):
         student = Student.query.filter_by(admission_number=admission_number).first()
         if not student:
             raise ValueError("Student not found")
         student.balance -= amount
         student.arrears = 0  # Reset arrears on payment
-        payment = Payment(admission_number=admission_number, amount=amount)
+        payment = Payment(admission_number=admission_number, amount=amount, method=method)
         db.session.add(payment)
         db.session.commit()
         return payment

@@ -1,30 +1,30 @@
 import React from 'react';
 import { useAuth } from '../auth/AuthProvider';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const { isLoggedIn, role } = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const goToDashboard = () => {
     switch (role) {
       case 'admin':
-        history.push('/admin');
+        navigate('/admin');
         break;
       case 'bursar':
-        history.push('/bursar');
+        navigate('/bursar');
         break;
       case 'director':
-        history.push('/director');
+        navigate('/director');
         break;
       case 'teacher':
-        history.push('/teacher');
+        navigate('/teacher');
         break;
       case 'student':
-        history.push('/student');
+        navigate('/student');
         break;
       default:
-        history.push('/login');
+        navigate('/login');
     }
   };
 
@@ -34,7 +34,7 @@ const Home = () => {
       {isLoggedIn ? (
         <button onClick={goToDashboard}>Go to Dashboard</button>
       ) : (
-        <button onClick={() => history.push('/login')}>Login</button>
+        <button onClick={() => navigate('/login')}>Login</button>
       )}
     </div>
   );
