@@ -1,27 +1,19 @@
 from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
-import bcrypt
+from app import db  # Import db from the app module
 
-db = SQLAlchemy()
 
 class Staff(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     phone = db.Column(db.String(25), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)  # Keep the password field
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     role = db.Column(db.String(50), nullable=False)
     representing = db.Column(db.String(100), nullable=True)
 
-    def set_password(self, password):
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
-
     def __repr__(self):
         return f'<Staff {self.name}>'
-        
+
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -33,19 +25,22 @@ class Student(db.Model):
     term_fee = db.Column(db.Float, nullable=False)
     use_bus = db.Column(db.Boolean, nullable=False)
     bus_balance = db.Column(db.Float, default=0.0)
+    password = db.Column(db.String(100), nullable=False)  # Keep the password field
 
     payments = db.relationship('Payment', backref='student', lazy=True)
 
-    def set_password(self, password):
-        self.admission_number = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    def check_password(self, password):
-        return bcrypt.checkpw(password.encode('utf-8'), self.admission_number.encode('utf-8'))
-
     def initialize_balance(self):
+
         fee = Fee.query.filter_by(grade=self.grade).first()
         if fee:
-            self.balance = fee.term_fee + self.arrears
+            self.balance = (fee.term_fee or 0) + (self.arrears or 0)
+        else:
+        # Handle the case where there is no fee record for the grade
+        # You can set a default value or log a message
+            self.balance = self.arrears  # or set it to 0.0, or whatever is appropriate
+
+
+        
 
 class Fee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,6 +50,7 @@ class Fee(db.Model):
     def __repr__(self):
         return f'<Fee {self.grade} - {self.term_fee}>'
 
+
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admission_number = db.Column(db.String(50), db.ForeignKey('student.admission_number'), nullable=False)
@@ -63,7 +59,7 @@ class Payment(db.Model):
     method = db.Column(db.String(15))
 
     @staticmethod
-    def record_payment(admission_number, amount,method):
+    def record_payment(admission_number, amount, method):
         student = Student.query.filter_by(admission_number=admission_number).first()
         if not student:
             raise ValueError("Student not found")
@@ -74,6 +70,7 @@ class Payment(db.Model):
         db.session.commit()
         return payment
 
+
 class BusPayment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admission_number = db.Column(db.String(50), db.ForeignKey('student.admission_number'), nullable=False)
@@ -83,6 +80,7 @@ class BusPayment(db.Model):
     def __repr__(self):
         return f'<BusPayment {self.admission_number} - {self.amount}>'
 
+
 class BusDestinationCharges(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     destination = db.Column(db.String(100), nullable=False)
@@ -91,6 +89,7 @@ class BusDestinationCharges(db.Model):
     def __repr__(self):
         return f'<BusDestination {self.destination} - {self.charge}>'
 
+
 class BoardingFee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     grade = db.Column(db.String(10), nullable=False)
@@ -98,6 +97,7 @@ class BoardingFee(db.Model):
 
     def __repr__(self):
         return f'<BoardingFee {self.grade} - {self.extra_fee}>'
+
 
 class Assignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,6 +109,7 @@ class Assignment(db.Model):
     def __repr__(self):
         return f'<Assignment {self.title} for Grade {self.grade}>'
 
+
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -119,6 +120,7 @@ class Event(db.Model):
     def __repr__(self):
         return f'<Event {self.title} on {self.date}>'
 
+
 class Gallery(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image_url = db.Column(db.String(255), nullable=False)
@@ -127,6 +129,7 @@ class Gallery(db.Model):
     def __repr__(self):
         return f'<Gallery Image {self.id}>'
 
+
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.Text, nullable=False)
@@ -134,4 +137,3 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f'<Notification {self.id} - {self.message}>'
-        

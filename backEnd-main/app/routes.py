@@ -1,23 +1,28 @@
-from flask import Flask, request, jsonify, Blueprint
-from app.models import db, Staff, Student, Fee, Payment, BusPayment, BusDestinationCharges, BoardingFee, Assignment, Event, Gallery, Notification
+from flask import request, jsonify, Blueprint
+from .models import db, Staff, Student, Fee, Payment, BusPayment, BusDestinationCharges, BoardingFee, Assignment, Event, Gallery, Notification
+from flask_bcrypt import Bcrypt
+from . import db
+from flask import current_app as app
+import logging
+
 
 routes = Blueprint('routes', __name__)
+bcrypt = Bcrypt()
 
-# Initialize the database here
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'your_database_uri'
-# db.init_app(app)
+logging.basicConfig(level=logging.DEBUG)
 
 # CRUD for Staff
 @routes.route('/staff', methods=['POST'])
 def create_staff():
     data = request.json
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')  # Hash the password
     new_staff = Staff(
         name=data['name'],
         phone=data['phone'],
         role=data['role'],
         representing=data.get('representing')
     )
-    new_staff.set_password(data['password'])  # Hash the password
+    new_staff.password = hashed_password  # Set hashed password
     db.session.add(new_staff)
     db.session.commit()
     return jsonify({'message': 'Staff member created'}), 201
@@ -26,6 +31,26 @@ def create_staff():
 def get_staff(id):
     staff = Staff.query.get_or_404(id)
     return jsonify({'id': staff.id, 'name': staff.name, 'phone': staff.phone, 'role': staff.role, 'representing': staff.representing})
+
+# Get all students
+@routes.route('/students', methods=['GET'])
+def get_all_students():
+    students = Student.query.all()  # Fetch all students
+    result = []
+    for student in students:
+        result.append({
+            'id': student.id,
+            'name': student.name,
+            'admission_number': student.admission_number,
+            'grade': student.grade,
+            'balance': student.balance,
+            'arrears': student.arrears,
+            'term_fee': student.term_fee,
+            'use_bus': student.use_bus,
+            'bus_balance': student.bus_balance
+        })
+    return jsonify(result), 200
+
 
 @routes.route('/staff/<int:id>', methods=['PUT'])
 def update_staff(id):
@@ -36,7 +61,7 @@ def update_staff(id):
     staff.role = data.get('role', staff.role)
     staff.representing = data.get('representing', staff.representing)
     if 'password' in data:
-        staff.set_password(data['password'])
+        staff.password = bcrypt.generate_password_hash(data['password']).decode('utf-8')  # Update hashed password
     db.session.commit()
     return jsonify({'message': 'Staff member updated'})
 
@@ -51,6 +76,7 @@ def delete_staff(id):
 @routes.route('/students', methods=['POST'])
 def create_student():
     data = request.json
+    hashed_password = bcrypt.generate_password_hash(data['admission_number']).decode('utf-8')  # Hash the admission number as password
     new_student = Student(
         name=data['name'],
         admission_number=data['admission_number'],
@@ -61,7 +87,7 @@ def create_student():
         use_bus=data['use_bus'],
         bus_balance=data.get('bus_balance', 0.0)
     )
-    new_student.set_password(data['admission_number'])  # Hash the admission number as password
+    new_student.password = hashed_password  # Set hashed password
     db.session.add(new_student)
     db.session.commit()
     return jsonify({'message': 'Student created'}), 201
@@ -83,7 +109,7 @@ def update_student(id):
     student.use_bus = data.get('use_bus', student.use_bus)
     student.bus_balance = data.get('bus_balance', student.bus_balance)
     if 'admission_number' in data:
-        student.set_password(data['admission_number'])  # Update password
+        student.password = bcrypt.generate_password_hash(data['admission_number']).decode('utf-8')  # Update hashed password
     db.session.commit()
     return jsonify({'message': 'Student updated'})
 
@@ -243,43 +269,46 @@ def delete_event(id):
 
 # CRUD for Gallery
 @routes.route('/gallery', methods=['POST'])
-def create_gallery():
+def create_gallery_entry():
     data = request.json
-    new_image = Gallery(
-        image_url=data['image_url'],
-        description=data.get('description', '')
+    new_entry = Gallery(
+        title=data['title'],
+        description=data['description'],
+        image_url=data['image_url']
     )
-    db.session.add(new_image)
+    db.session.add(new_entry)
     db.session.commit()
-    return jsonify({'message': 'Gallery image created'}), 201
+    return jsonify({'message': 'Gallery entry created'}), 201
 
 @routes.route('/gallery/<int:id>', methods=['GET'])
-def get_gallery_image(id):
-    image = Gallery.query.get_or_404(id)
-    return jsonify({'id': image.id, 'image_url': image.image_url, 'description': image.description})
+def get_gallery_entry(id):
+    entry = Gallery.query.get_or_404(id)
+    return jsonify({'id': entry.id, 'title': entry.title, 'description': entry.description, 'image_url': entry.image_url})
 
 @routes.route('/gallery/<int:id>', methods=['PUT'])
-def update_gallery_image(id):
-    image = Gallery.query.get_or_404(id)
+def update_gallery_entry(id):
+    entry = Gallery.query.get_or_404(id)
     data = request.json
-    image.image_url = data.get('image_url', image.image_url)
-    image.description = data.get('description', image.description)
+    entry.title = data.get('title', entry.title)
+    entry.description = data.get('description', entry.description)
+    entry.image_url = data.get('image_url', entry.image_url)
     db.session.commit()
-    return jsonify({'message': 'Gallery image updated'})
+    return jsonify({'message': 'Gallery entry updated'})
 
 @routes.route('/gallery/<int:id>', methods=['DELETE'])
-def delete_gallery_image(id):
-    image = Gallery.query.get_or_404(id)
-    db.session.delete(image)
+def delete_gallery_entry(id):
+    entry = Gallery.query.get_or_404(id)
+    db.session.delete(entry)
     db.session.commit()
-    return jsonify({'message': 'Gallery image deleted'})
+    return jsonify({'message': 'Gallery entry deleted'})
 
 # CRUD for Notifications
 @routes.route('/notifications', methods=['POST'])
 def create_notification():
     data = request.json
     new_notification = Notification(
-        message=data['message']
+        message=data['message'],
+        date=data['date']
     )
     db.session.add(new_notification)
     db.session.commit()
@@ -295,6 +324,7 @@ def update_notification(id):
     notification = Notification.query.get_or_404(id)
     data = request.json
     notification.message = data.get('message', notification.message)
+    notification.date = data.get('date', notification.date)
     db.session.commit()
     return jsonify({'message': 'Notification updated'})
 
@@ -304,7 +334,3 @@ def delete_notification(id):
     db.session.delete(notification)
     db.session.commit()
     return jsonify({'message': 'Notification deleted'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
-    
