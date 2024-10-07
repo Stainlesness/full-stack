@@ -27,6 +27,25 @@ def create_staff():
     db.session.commit()
     return jsonify({'message': 'Staff member created'}), 201
 
+@routes.route('/staff', methods=['GET'])
+def get_all_staff():
+    staff_members = Staff.query.all()  # Fetch all staff members
+    staff_list = []
+    
+    for staff in staff_members:
+        staff_data = {
+            'id': staff.id,
+            'name': staff.name,
+            'phone': staff.phone,
+            'role': staff.role,
+            'representing': staff.representing,
+            'created_at': staff.created_at
+        }
+        staff_list.append(staff_data)
+
+    return jsonify(staff_list), 200
+    
+
 @routes.route('/staff/<int:id>', methods=['GET'])
 def get_staff(id):
     staff = Staff.query.get_or_404(id)
@@ -244,6 +263,24 @@ def create_event():
     db.session.commit()
     return jsonify({'message': 'Event created'}), 201
 
+@routes.route('/events', methods=['GET'])
+def get_all_events():
+    events = Event.query.all()  # Fetch all events
+    event_list = []
+    
+    for event in events:
+        event_data = {
+            'id': event.id,
+            'title': event.title,
+            'date': event.date,
+            'destination': event.destination,
+            'description': event.description
+        }
+        event_list.append(event_data)
+
+    return jsonify(event_list), 200
+    
+
 @routes.route('/events/<int:id>', methods=['GET'])
 def get_event(id):
     event = Event.query.get_or_404(id)
@@ -280,6 +317,22 @@ def create_gallery_entry():
     db.session.commit()
     return jsonify({'message': 'Gallery entry created'}), 201
 
+@routes.route('/gallery', methods=['GET'])
+def get_all_gallery():
+    gallery_items = Gallery.query.all()  # Fetch all gallery items
+    gallery_list = []
+    
+    for gallery_item in gallery_items:
+        gallery_data = {
+            'id': gallery_item.id,
+            'image_url': gallery_item.image_url,
+            'description': gallery_item.description
+        }
+        gallery_list.append(gallery_data)
+
+    return jsonify(gallery_list), 200
+    
+
 @routes.route('/gallery/<int:id>', methods=['GET'])
 def get_gallery_entry(id):
     entry = Gallery.query.get_or_404(id)
@@ -314,6 +367,21 @@ def create_notification():
     db.session.commit()
     return jsonify({'message': 'Notification created'}), 201
 
+@routes.route('/notifications', methods=['GET'])
+def get_all_notifications():
+    notifications = Notification.query.all()  # Fetch all notifications
+    notification_list = []
+    
+    for notification in notifications:
+        notification_data = {
+            'id': notification.id,
+            'message': notification.message,
+            'date': notification.date
+        }
+        notification_list.append(notification_data)
+
+    return jsonify(notification_list), 200
+
 @routes.route('/notifications/<int:id>', methods=['GET'])
 def get_notification(id):
     notification = Notification.query.get_or_404(id)
@@ -334,3 +402,17 @@ def delete_notification(id):
     db.session.delete(notification)
     db.session.commit()
     return jsonify({'message': 'Notification deleted'})
+
+
+
+# Route to get all events
+
+
+# Route to get all gallery items
+
+
+# Route to get all notifications
+
+
+
+# Route to get all staff members
